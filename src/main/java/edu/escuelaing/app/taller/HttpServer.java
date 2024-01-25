@@ -17,37 +17,53 @@ public class HttpServer {
             System.exit(1);
         }
 
-        Socket clientSocket = null;
-        try {
-            System.out.println("Listo para recibir ...");
-            clientSocket = serverSocket.accept();
-        } catch (IOException e) {
-            System.err.println("Accept failed.");
-            System.exit(1);
-        }
+        boolean running = true;
 
-        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        String inputLine;
-
-        while ((inputLine = in.readLine()) != null) {
-            System.out.println(inputLine);
-            if (!in.ready()) {
-                break;
+        while(running){
+            Socket clientSocket = null;
+            try {
+                System.out.println("Listo para recibir ...");
+                clientSocket = serverSocket.accept();
+            } catch (IOException e) {
+                System.err.println("Accept failed.");
+                System.exit(1);
             }
+
+            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            String inputLine;
+            boolean firstLine = true;
+            String query = "";
+
+            while ((inputLine = in.readLine()) != null) {
+                System.out.println(inputLine);
+                if(firstLine){
+                    query = inputLine.split(" ")[1];
+                    firstLine = false;
+                }
+                if (!in.ready()) {
+                    break;
+                }
+            }
+
+            if(query.equals("/cliente")){
+                sendIndex(clientSocket, out);
+            }else{
+                sendError(clientSocket, out);
+            }
+            
+            
+            
+
+            out.close();
+            in.close();
+            clientSocket.close();
         }
-
-        sendResponse(clientSocket, out, "");
-
-        out.close();
-        in.close();
-        clientSocket.close();
         serverSocket.close();
     }
 
-    public static void sendResponse (Socket client, PrintWriter outPut, String pathToFile) throws FileNotFoundException, IOException{
-        pathToFile = pathToFile.isEmpty() ? "index.html" : pathToFile;
-        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(pathToFile))) {
+    public static void sendIndex (Socket client, PrintWriter outPut) throws FileNotFoundException, IOException{
+        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream("index.html"))) {
             outPut.println("HTTP/1.1 200 OK");
             outPut.println("Content-Type: text/html");
             outPut.println("Content-Length: " + bufferedInputStream.available());
@@ -60,6 +76,19 @@ public class HttpServer {
                 client.getOutputStream().write(buffer, 0, bytesRead);
             }
         }
-    }   
+    }
+
+    public static void sendError (Socket client, PrintWriter outPut) {
+        outPut.println("HTTP/1.1 404 Not found");
+        outPut.println("Content-Type: text/html");
+        outPut.println("<!DOCTYPE html>\r\n" + //
+                            "<html>\r\n" + 
+                            "<p>Error, this resource is not available</p>\r\n" +
+                            "</html>");
+    }
+
+    // private static void requestManager (Socket client, PrintWriter outPut){
+        
+    // }
 }
 
