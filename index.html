@@ -7,12 +7,12 @@
         <style>
             body {
                 font-family: 'Arial', sans-serif;
-                margin: 0; /* Elimina el margen predeterminado del cuerpo */
+                margin: 0;
                 display: flex;
                 flex-direction: column;
-                align-items: center; /* Centra los elementos horizontalmente */
-                justify-content: center; /* Centra los elementos verticalmente */
-                min-height: 100vh; /* Establece la altura mínima al 100% de la ventana */
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
             }
             h1 {
                 color: #333;
@@ -86,10 +86,9 @@
                     .catch(error => console.error('Error:', error));
             }
 
-            // Función para formatear los valores, maneja las estructuras anidadas
+            // It handles nested data structures
             function formatValue(value) {
-                if (typeof value === 'object') {
-                    // Si el valor es un objeto, formatea recursivamente
+                if (typeof value === 'object') { // If the value is an object, it formats recursively
                     let subTable = '<table border="1">';
                     for (const subKey in value) {
                         if (value.hasOwnProperty(subKey)) {
@@ -99,7 +98,7 @@
                     subTable += '</table>';
                     return subTable;
                 } else {
-                    // Si no es un objeto, simplemente devuelve el valor
+                    // Return the value if no object type is found
                     return value;
                 }
             }

@@ -3,7 +3,7 @@ package edu.escuelaing.app.taller;
 import java.net.*;
 import java.io.*;
 
-public class HttpServer {
+public class HTTPServer {
     private static HTTPResponseHeaders serverResponseHeaders = new HTTPResponseHeaders("html");
     private static HTTPResponseData serverResponseData = new HTTPResponseData();
     private static APIConnection API = new APIConnection();
@@ -34,8 +34,6 @@ public class HttpServer {
                 System.err.println("Accept failed.");
                 System.exit(1);
             }
-
-            
         }
         serverSocket.close();
     }
@@ -82,7 +80,7 @@ public class HttpServer {
     private static void HTTPError(PrintWriter outPut) {
         // Send headers to the client
         serverResponseHeaders.setContentType("html");
-        outPut.println(serverResponseHeaders.BadRequestResponse());
+        outPut.println(serverResponseHeaders.NotFoundResponse());
         // Send HTML structure to the client
         outPut.println(serverResponseData.getNotFoundPage());
     }

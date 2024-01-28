@@ -13,7 +13,7 @@ public class HTTPResponseHeaders{
                 "";
     }
 
-    public String BadRequestResponse(){
+    public String NotFoundResponse(){
         return "HTTP/1.1 404 Not Found\r\n" +
                 "Content-Type: text/" + this.CONTENT_TYPE + "\r\n" +
                 "";
