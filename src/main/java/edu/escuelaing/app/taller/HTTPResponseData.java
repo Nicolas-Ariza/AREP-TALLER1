@@ -1,7 +1,18 @@
 package edu.escuelaing.app.taller;
 
-public class HTTPResponseData{
+/**
+ * The `HTTPResponseData` class provides methods for generating HTML pages and JSON error messages
+ * to be sent as responses in an HTTP server. It includes a method to create the index page, a method
+ * for the "not found" page, and a method to return a JSON error message.
+ * @author Nicolas Ariza Barbosa
+ */
+public class HTTPResponseData {
 
+    /**
+     * Generates the HTML content for the index page, which includes a form to query movies and a
+     * div to display the API response as an HTML table.
+     * @return The HTML content for the index page.
+     */
     public String getIndexPage(){
         return "<!DOCTYPE html>\r\n" + //
         "<html>\r\n" + //
@@ -71,7 +82,9 @@ public class HTTPResponseData{
         "            function loadGetMovie(){\r\n" + //
         "                let name = document.getElementById(\"name\").value;\r\n" + //
         "                let url = \"/?name=\" + name;\r\n" + //
-        "\r\n" + //
+        "\r\n"
+
+ + //
         "                fetch(url, { method: 'GET' })\r\n" + //
         "                    .then(x => x.json())\r\n" + //
         "                    .then(y => {\r\n" + //
@@ -114,6 +127,10 @@ public class HTTPResponseData{
         "";
     }
 
+    /**
+     * Generates the HTML content for the "not found" page, indicating that the requested resource does not exist.
+     * @return The HTML content for the "not found" page.
+     */
     public String getNotFoundPage(){
         return "<!DOCTYPE html>\r\n" +
                     "<html>\r\n" +
@@ -121,6 +138,10 @@ public class HTTPResponseData{
                     "</html>";
     }
 
+    /**
+     * Returns a JSON error message indicating that the requested resource was not found.
+     * @return The JSON error message.
+     */
     public String getJSONErrorMessage(){
         return "{\"Not found\":\"The resource that you were looking for does not exist\"}";
     }
