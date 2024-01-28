@@ -1,14 +1,14 @@
 package edu.escuelaing.app.taller;
 
 import java.net.*;
-import java.util.HashMap;
-import java.util.Map;
 import java.io.*;
 
-public class HttpServer {
+public class HTTPServer {
+    private static HTTPResponseHeaders serverResponseHeaders = new HTTPResponseHeaders("html");
+    private static HTTPResponseData serverResponseData = new HTTPResponseData();
+    private static APIConnection API = new APIConnection();
     
     public static void main(String[] args) throws IOException {
-        Map <String, String> headers = null;
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(35000);
@@ -20,75 +20,70 @@ public class HttpServer {
         boolean running = true;
 
         while(running){
-            Socket clientSocket = null;
             try {
-                System.out.println("Listo para recibir ...");
-                clientSocket = serverSocket.accept();
+                Socket clientSocket = serverSocket.accept();
+                Thread clientThread = new Thread(() -> { // Multiuser feature delegated to threads
+                    try {
+                        handleClientConnection(clientSocket);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                clientThread.start();
             } catch (IOException e) {
                 System.err.println("Accept failed.");
                 System.exit(1);
             }
-
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            String inputLine;
-            boolean firstLine = true;
-            String query = "";
-
-            while ((inputLine = in.readLine()) != null) {
-                System.out.println(inputLine);
-                if(firstLine){
-                    query = inputLine.split(" ")[1];
-                    firstLine = false;
-                }
-                if (!in.ready()) {
-                    break;
-                }
-            }
-
-            if(query.equals("/cliente")){
-                sendIndex(clientSocket, out);
-            }else{
-                sendError(clientSocket, out);
-            }
-            
-            
-            
-
-            out.close();
-            in.close();
-            clientSocket.close();
         }
         serverSocket.close();
     }
 
-    public static void sendIndex (Socket client, PrintWriter outPut) throws FileNotFoundException, IOException{
-        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream("index.html"))) {
-            outPut.println("HTTP/1.1 200 OK");
-            outPut.println("Content-Type: text/html");
-            outPut.println("Content-Length: " + bufferedInputStream.available());
-            outPut.println();
+    private static void handleClientConnection(Socket client) throws IOException{
+        PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+        String inputLine;
+        boolean firstLine = true;
+        String query = "";
 
-            // Enviar el contenido del archivo HTML
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = bufferedInputStream.read(buffer)) != -1) {
-                client.getOutputStream().write(buffer, 0, bytesRead);
+        while ((inputLine = in.readLine()) != null) {
+            if(firstLine){
+                query = inputLine.split(" ")[1].toLowerCase();
+                firstLine = false;
+            }
+            if (!in.ready()) {
+                break;
             }
         }
-    }
 
-    public static void sendError (Socket client, PrintWriter outPut) {
-        outPut.println("HTTP/1.1 404 Not found");
-        outPut.println("Content-Type: text/html");
-        outPut.println("<!DOCTYPE html>\r\n" + //
-                            "<html>\r\n" + 
-                            "<p>Error, this resource is not available</p>\r\n" +
-                            "</html>");
-    }
-
-    // private static void requestManager (Socket client, PrintWriter outPut){
+        if(query.equals("/")){ // Return page index
+            HTTPResponse(out);
+        }else if ((query.startsWith("/?name=")) && (query.length() > 7)){ // Validates the message and queries in the API
+            API.setQuery(query.substring(7));
+            API.getRequest(out, serverResponseHeaders, serverResponseData);
+        }else{ // Error if everything else fails
+            HTTPError(out);
+        }
         
-    // }
+        out.close();
+        in.close();
+        client.close();
+    }
+
+    public static void HTTPResponse (PrintWriter outPut) throws FileNotFoundException, IOException{
+        // Send headers to the client
+        serverResponseHeaders.setContentType("html");
+        outPut.println(serverResponseHeaders.OKResponse());
+        // Send index.html to the client
+        outPut.println(serverResponseData.getIndexPage());
+    }
+
+    private static void HTTPError(PrintWriter outPut) {
+        // Send headers to the client
+        serverResponseHeaders.setContentType("html");
+        outPut.println(serverResponseHeaders.NotFoundResponse());
+        // Send HTML structure to the client
+        outPut.println(serverResponseData.getNotFoundPage());
+    }
 }
+
 
