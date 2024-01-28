@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"edu.escuelaing.app.taller","l":"APIConnection"},{"p":"edu.escuelaing.app.taller","l":"HTTPResponseData"},{"p":"edu.escuelaing.app.taller","l":"HTTPResponseHeaders"},{"p":"edu.escuelaing.app.taller","l":"HTTPServer"}];updateSearchResults();
