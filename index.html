@@ -4,24 +4,105 @@
         <title>Movie DB</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                margin: 0; /* Elimina el margen predeterminado del cuerpo */
+                display: flex;
+                flex-direction: column;
+                align-items: center; /* Centra los elementos horizontalmente */
+                justify-content: center; /* Centra los elementos verticalmente */
+                min-height: 100vh; /* Establece la altura mínima al 100% de la ventana */
+            }
+            h1 {
+                color: #333;
+            }
+            form {
+                margin-bottom: 20px;
+            }
+            label {
+                font-weight: bold;
+                margin-right: 10px;
+            }
+            input[type="text"] {
+                padding: 5px;
+                width: 200px;
+            }
+            input[type="button"] {
+                padding: 5px 10px;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                cursor: pointer;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            table, th, td {
+                border: 1px solid #ddd;
+            }
+            th, td {
+                padding: 10px;
+                text-align: left;
+            }
+            th {
+                background-color: #4CAF50;
+                color: white;
+            }
+        </style>
     </head>
     <body>
         <h1>Query Your Favorite Movies</h1>
-        <form action="/client">
+        <form>
             <label for="movieName">Name:</label><br>
             <input type="text" id="name" name="name"><br><br>
-            <input type="button" value="Query" onclick="loadGetMsg(movieName)">
+            <input type="button" value="Query" onclick="loadGetMovie()">
         </form> 
         <div id="getresp"></div>
 
         <script>
-            function loadGetMovie(name){
-                let url = "/?name=" + name.value;
+            function loadGetMovie(){
+                let name = document.getElementById("name").value;
+                let url = "/?name=" + name;
+
                 fetch(url, { method: 'GET' })
                     .then(x => x.json())
-                    .then(y => document.getElementById("getresp").innerHTML = JSON.stringify(y, null, 2));
+                    .then(y => {
+                        
+                        // Map the JSON data to an HTML table
+                        let tableHTML = '<table border="1">';
+                        for (const key in y) {
+                            if (y.hasOwnProperty(key)) {
+                                tableHTML += `<tr><td>${key}</td><td>${formatValue(y[key])}</td></tr>`;
+                            }
+                        }
+                        tableHTML += '</table>';
+
+                        // Display the table in the "getresp" div
+                        document.getElementById("getresp").innerHTML = tableHTML;
+                    })
+                    .catch(error => console.error('Error:', error));
             }
-            
+
+            // Función para formatear los valores, maneja las estructuras anidadas
+            function formatValue(value) {
+                if (typeof value === 'object') {
+                    // Si el valor es un objeto, formatea recursivamente
+                    let subTable = '<table border="1">';
+                    for (const subKey in value) {
+                        if (value.hasOwnProperty(subKey)) {
+                            subTable += `<tr><td>${subKey}</td><td>${formatValue(value[subKey])}</td></tr>`;
+                        }
+                    }
+                    subTable += '</table>';
+                    return subTable;
+                } else {
+                    // Si no es un objeto, simplemente devuelve el valor
+                    return value;
+                }
+            }
         </script>
     </body>
 </html>
