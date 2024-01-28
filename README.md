@@ -61,8 +61,8 @@ http://localhost:35000/
 ```
 A continuación se muestra la interfaz de usuario en el browser junto a una consulta.
 
-![Alt text](images\sample1.png)
-![Alt text](images\sample2.png)
+![Alt text](images/sample1.png)
+![Alt text](images/sample2.png)
 
 
 ## Ejecutando pruebas unitarias
