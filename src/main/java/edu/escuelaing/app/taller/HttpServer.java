@@ -75,7 +75,7 @@ public class HTTPServer {
         if(query.equals("/")){ // Return page index
             HTTPResponse(out);
         } else if ((query.startsWith("/?name=")) && (query.length() > 7)){ // Validates the message and queries in the API
-            API.setQuery(query.substring(7));
+            API.setUserQuery(query.substring(7));
             API.getRequest(out, serverResponseHeaders, serverResponseData);
         } else { // Error if everything else fails
             HTTPError(out);
