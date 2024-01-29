@@ -40,48 +40,48 @@ public class APIConnection {
      * @throws IOException If an I/O error occurs while making the API request.
      */
     public void getRequest(PrintWriter outPut, HTTPResponseHeaders sResponseHeaders, HTTPResponseData sResponseData) throws IOException{
-        // Establishes a connection to the OMDB API
-        URL obj = new URL(GET_URL + "&t=" + this.userQuery);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("User-Agent", USER_AGENT);
-        StringBuffer response = new StringBuffer();
         
-        // Retrieves the response code from the API request
-        int responseCode = con.getResponseCode();
-        
-        if (responseCode == HttpURLConnection.HTTP_OK) { // success
-            // Reads the API response and appends it to the StringBuffer
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String inputLine;
+        // Sets the content type as JSON and sends the OK response headers to the client
+        sResponseHeaders.setContentType("json");
+        outPut.println(sResponseHeaders.OKResponse());
 
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
+        if(cache.get(this.userQuery) == null){ // Check if the movie name is alredy in cache
+            // Establishes a connection to the OMDB API
+            URL obj = new URL(GET_URL + "&t=" + this.userQuery);
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("User-Agent", USER_AGENT);
+            StringBuffer response = new StringBuffer();
+            
+            // Retrieves the response code from the API request
+            int responseCode = con.getResponseCode();
+            
+            if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                // Reads the API response and appends it to the StringBuffer
+                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String inputLine;
 
-            // Sets the content type as JSON and sends the OK response headers to the client
-            sResponseHeaders.setContentType("json");
-            outPut.println(sResponseHeaders.OKResponse());
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
 
-            // Checks if the movie is not found in the API response
-            if(response.toString().equals("{\"Response\":\"False\",\"Error\":\"Movie not found!\"}")){
-                outPut.println(sResponseData.getJSONErrorMessage());
-            }else{
-                // Checks if the movie is in the cache
-                if(cache.get(this.userQuery) == null){ 
+                // Checks if the movie is not found in the API response
+                if(response.toString().equals("{\"Response\":\"False\",\"Error\":\"Movie not found!\"}")){
+                    outPut.println(sResponseData.getJSONErrorMessage());
+                }else{
                     // Stores the API response in the cache
                     cache.put(this.userQuery, response);
                     // Sends the API response to the client
                     outPut.println(response.toString());
-                }else{
-                    // Sends the cached API response to the client
-                    outPut.println(cache.get(this.userQuery).toString());
                 }
-            }
 
-        } else {
-            System.out.println("GET request not worked");
+            } else {
+                System.out.println("GET request not worked");
+            }
+        }else{
+            // Sends the cached API response to the client
+            outPut.println(cache.get(this.userQuery).toString());
         }
     }
 }
